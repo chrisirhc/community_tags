@@ -26,18 +26,40 @@ function community_tags_form($form_state, $edit, $title = NULL) {
   
   $access = user_access('tag content');
 
-  $form['tags-'. $edit['vid']] = array(
-    '#type' => 'textfield',
-    '#title' => t('My !name', array('!name' => $vocabulary->name)),
-    '#maxlength' => 100,
-    '#default_value' => $edit['tags'],
-    '#required' => FALSE,
-    '#autocomplete_path' => 'taxonomy/autocomplete/'. $edit['vid'],
-    '#attributes' => array('class' => 'form-tags form-tags-'. $edit['vid']),
-    '#access' => $access,
-  );
-  if ($edit['inline']) {
-    $form['tags-'. $edit['vid']]['#size'] = 20;
+  // If it's restricted and not multiple select
+  if ($vocabulary->multiple == 0 && $vocabulary->tags == 0) {
+    // $render_tags = drupal_explode_tags($edit['tags']);
+    $tags_in_vocab = taxonomy_get_tree($edit['vid']);
+    $render_tags = array();
+    foreach($tags_in_vocab as $tag) {
+      $render_tags[$tag->name] = t($tag->name);
+    }
+    $form['tags'] = array(
+      '#type' => 'radios',
+      '#title' => t('My !name', array('!name' => $vocabulary->name)),
+      '#default_value' => $edit['tags'],// is_array($render_tags) ? $render_tags[0] : NULL, // select only the first
+      '#required' => FALSE,
+      '#attributes' => array('class' => 'form-tags-radio form-tags-'. $edit['vid']),
+      '#access' => $access,
+      '#options' => $render_tags, // not accounting for internationalization t()
+    );
+    if ($edit['inline']) {
+      $form['tags']['#size'] = 20;
+    }
+  } else {
+    $form['tags-'] = array(
+      '#type' => 'textfield',
+      '#title' => t('My !name', array('!name' => $vocabulary->name)),
+      '#maxlength' => 100,
+      '#default_value' => $edit['tags'],
+      '#required' => FALSE,
+      '#autocomplete_path' => 'taxonomy/autocomplete/'. $edit['vid'],
+      '#attributes' => array('class' => 'form-tags form-tags-'. $edit['vid']),
+      '#access' => $access,
+    );
+    if ($edit['inline']) {
+      $form['tags-']['#size'] = 20;
+    }
   }
   
   if (!$access) {
