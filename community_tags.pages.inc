@@ -135,8 +135,7 @@ function community_tags_settings() {
   }
   if ($options) {
     $form['community_tags_vocabularies'] = array(
-      '#type' => 'select',
-      '#multiple' => TRUE,
+      '#type' => 'checkboxes',
       '#title' => t('Community vocabularies'),
       '#default_value' => variable_get('community_tags_vocabularies', array()),
       '#options' => $options,
