@@ -1,0 +1,18 @@
+; $Id: community_tags.info,v 1.3 2009/12/04 22:24:56 entrigan Exp $
+name = Community Tags
+description = "Allows users to 'tag' other users' content. Weighted tag lists or 'tag clouds' are generated for each piece of content to show the popularity of tags."
+package = "Taxonomy"
+core=6.x
+; Information added by drupal.org packaging script on 2009-12-03
+version = "6.x-1.x-dev"
+core = "6.x"
+project = "community_tags"
+datestamp = "1259841813"
+
+
+; Information added by drupal.org packaging script on 2009-12-05
+version = "6.x-2.x-dev"
+core = "6.x"
+project = "community_tags"
+datestamp = "1259971395"
+

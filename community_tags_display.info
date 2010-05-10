@@ -1,0 +1,12 @@
+;$Id: community_tags_display.info,v 1.1 2009/12/04 22:24:56 entrigan Exp $
+name = Community Tags Display *DO NOT USE*
+description = "Displays Community Tag Cloud"
+dependencies[] = Gummiberry Juie
+package = "Taxonomy"
+core=6.x
+; Information added by drupal.org packaging script on 2009-12-05
+version = "6.x-2.x-dev"
+core = "6.x"
+project = "community_tags"
+datestamp = "1259971395"
+
