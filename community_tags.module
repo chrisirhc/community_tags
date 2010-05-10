@@ -259,7 +259,7 @@ function community_tags_taxonomy_node_save($node, $terms, $is_owner, $uid) {
   // If not, we at least want the existing counts to update them.
 
   $old_tags_by_uid = array();
-  $result = db_query('SELECT * FROM {community_tags} ttn WHERE nid = %d', $nid);
+  $result = db_query('SELECT ttn.*, td.vid FROM {community_tags} ttn JOIN {term_data} td ON td.tid = ttn.tid WHERE nid = %d', $nid);
   while ($old_tag_node = db_fetch_object($result)) {
     $old_tags_by_uid[$old_tag_node->uid][$old_tag_node->tid] = $old_tag_node;
   }
@@ -268,6 +268,10 @@ function community_tags_taxonomy_node_save($node, $terms, $is_owner, $uid) {
   $inserted_tids = array();
 
   $tids = array();
+  $vids = array(); // Future support for multiple vocabularies to be used in the same form
+
+  // Process the entries from the quick tag form
+
   // Free tagging vocabularies do not send their tids in the form,
   // so we'll detect them here and process them independently.
   if (isset($terms['tags'])) {
@@ -276,6 +280,8 @@ function community_tags_taxonomy_node_save($node, $terms, $is_owner, $uid) {
     
     foreach ($typed_input as $vid=>$vid_value) {
       if (isset($community_tagged[$vid])) {
+        // http://groups.google.com/group/tickets-cakephp/browse_thread/thread/7f5f9ab54795a4d3
+        $vids[$vid] = true;
 
         $typed_terms = is_array($vid_value)?$vid_value:drupal_explode_tags($vid_value);
         foreach ($typed_terms as $typed_term) {
@@ -286,6 +292,7 @@ function community_tags_taxonomy_node_save($node, $terms, $is_owner, $uid) {
           foreach ($possibilities as $possibility) {
             if ($possibility->vid == $vid) {
               $typed_term_tid = $possibility->tid;
+              break; // Stop at the first one
             }
           }
     
@@ -327,7 +334,8 @@ function community_tags_taxonomy_node_save($node, $terms, $is_owner, $uid) {
       if ($is_owner && isset($inserted_tids[$old_tag->tid]) && $old_tag->uid != $uid) {
         $tag_nodes[] = $old_tag;
       }
-      elseif (!$is_owner && $old_tag->uid != $uid) {
+      // Otherwise, re-insert if it's another user's or another vid
+      elseif (!$is_owner && ($old_tag->uid != $uid || !isset($vids[$old_tag->vid]))) {
         $tag_nodes[] = $old_tag;
       }
     }
@@ -343,6 +351,7 @@ function community_tags_taxonomy_node_save($node, $terms, $is_owner, $uid) {
     $existing_term_nodes[$term_node->tid] = TRUE;
   }
 
+  // TODO this is rather expensive. Is this for real?
   // Re-insert tag-node-user associations and term-node if not existing.
   db_lock_table('{community_tags}');
   db_query('DELETE FROM {community_tags} WHERE nid = %d', $nid);
@@ -408,6 +417,7 @@ function _community_tags_get_tag_result($type = 'global', $limit = NULL, $arg1 =
   $sql = '';
 
   switch ($type) {
+    // TODO not updated for multiple vid
     case 'node':
       $arg1 = (int)$arg1;
       $arg2 = NULL;

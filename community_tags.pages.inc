@@ -129,7 +129,7 @@ function community_tags_settings() {
 
   // Build list of available free-tagging vocabularies
   $options = array();
-  $vocabs = db_query('SELECT v.vid, v.name FROM {vocabulary} v WHERE v.tags = 1 ORDER BY v.weight, v.name');
+  $vocabs = db_query('SELECT v.vid, v.name FROM {vocabulary} v ORDER BY v.weight, v.name');
   while ($vocabulary = db_fetch_object($vocabs)) {
     $options[$vocabulary->vid] = $vocabulary->name;
   }
@@ -140,7 +140,7 @@ function community_tags_settings() {
       '#title' => t('Community vocabularies'),
       '#default_value' => variable_get('community_tags_vocabularies', array()),
       '#options' => $options,
-      '#description' => t('Which vocabularies should community tagging use? Note: only one community tagged vocabulary per node type is supported.'),
+      '#description' => t('Which vocabularies should community tagging use?'),
     );
   }
 
