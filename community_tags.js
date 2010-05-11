@@ -26,6 +26,7 @@ Drupal.serialize = function (data, prefix) {
   return out;
 }
 
+// TODO onChange handler
 Drupal.behaviors.communityTags = function(context) {
   // Note: all tag fields are autocompleted, and have already been initialized at this point.
   $('input.form-tags', context).each(function () {
@@ -101,5 +102,36 @@ Drupal.behaviors.communityTags = function(context) {
       var list = $('ul', widget);
 
       updateList();
+  });
+
+  // handle the radios
+  // TODO put the option to live change when radio is changed
+  $('form.community-tags-form-radio', context).each(function () {
+
+      // Hide submit buttons.
+      $('input[type=submit]', this).hide();
+
+      // Fetch settings.
+      var nid = $('input[name=nid]', this).val();
+      var vid = $('input[name=vid]', this).val();
+      var o = Drupal.settings.communityTags['n_' + nid]['v_' + vid];
+
+      var sequence = 0;
+
+      var currentcontext = this;
+
+      // Prepare the add Ajax handler and add the button.
+      var addHandler = function () {
+        // Send existing tags and new tag string.
+        $.post(o.url, Drupal.serialize({ sequence: ++sequence, tags: null,
+            add: $('input[name=tags]:checked', currentcontext).val() }), function (data) {
+          data = Drupal.parseJson(data);
+          if (data.status && sequence == data.sequence) {
+            o.tags = data.tags;
+          }
+        });
+      };
+      $('input.form-tags-radio', this).click(addHandler);
+      $(this).submit(function () { addHandler(); return false; });
   });
 }

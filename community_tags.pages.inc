@@ -46,6 +46,7 @@ function community_tags_form($form_state, $edit, $title = NULL) {
     if ($edit['inline']) {
       $form['tags']['#size'] = 20;
     }
+    $form['#attributes'] = array('class' => 'community-tags-form-radio');
   } else {
     $form['tags-'] = array(
       '#type' => 'textfield',
